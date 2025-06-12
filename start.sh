@@ -27,26 +27,30 @@ fi
 ###############################################################################
 # One‑time Docker install (APT, rootful) – optional prompt
 ###############################################################################
-read -rp "Run one‑time Docker installation? [y/N]: " ans
-if [[ $ans =~ ^[Yy]$ ]]; then
-  apt-get update
-  apt-get install -y ca-certificates curl gnupg
+if ! command -v docker >/dev/null 2>&1; then
+  read -rp "Run one‑time Docker installation? [y/N]: " ans
+  if [[ $ans =~ ^[Yy]$ ]]; then
+    apt-get update
+    apt-get install -y ca-certificates curl gnupg
 
-  install -m 0755 -d /etc/apt/keyrings
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-    -o /etc/apt/keyrings/docker.asc
-  chmod a+r /etc/apt/keyrings/docker.asc
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+      -o /etc/apt/keyrings/docker.asc
+    chmod a+r /etc/apt/keyrings/docker.asc
 
-  echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
-     https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo ${UBUNTU_CODENAME:-$VERSION_CODENAME}) stable" \
-    > /etc/apt/sources.list.d/docker.list
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
+       https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo ${UBUNTU_CODENAME:-$VERSION_CODENAME}) stable" \
+      > /etc/apt/sources.list.d/docker.list
 
-  apt-get update
-  apt-get install -y docker-ce docker-ce-cli containerd.io \
-                     docker-buildx-plugin docker-compose-plugin
+    apt-get update
+    apt-get install -y docker-ce docker-ce-cli containerd.io \
+                       docker-buildx-plugin docker-compose-plugin
 
-  docker run --rm hello-world
+    docker run --rm hello-world
+  fi
+else
+  echo "Docker already installed – skipping installation." >&2
 fi
 
 ###############################################################################
@@ -172,6 +176,17 @@ create_or_start pihole \
   -v pihole_config:/etc/pihole \
   --cap-add=NET_ADMIN \
   pihole/pihole:latest
+
+### MeTube ---------------------------------------------------------------
+# Create the downloads directory if needed
+mkdir -p /var/nas/Private/Downloads/Metube
+chown "$USER_ID:$GROUP_ID" /var/nas/Private/Downloads/Metube
+
+create_or_start metube \
+  -p 8081:8081 \
+  --user "$USER_ID:$GROUP_ID" \
+  -v /var/nas/Private/Downloads/Metube:/downloads \
+  ghcr.io/alexta69/metube
 
 ### JupyterLab (with git & scheduler plugins) ---------------------------
 # Build the image the first time the script runs

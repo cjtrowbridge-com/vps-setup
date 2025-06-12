@@ -9,7 +9,7 @@ integration.
 1. Log in as **root** and run `./start.sh`.
 2. If more than one directory exists under `/home`, the script will prompt
    which user directory to use for bind mounts.
-3. The script optionally installs Docker if it is not already present.
+3. The script checks for Docker and offers to install it if missing.
 4. Containers are then created or started as needed. Existing containers are
    reused so the script can be run multiple times safely.
 
@@ -30,6 +30,7 @@ At completion a list of URLs for each service will be displayed.
   - **Jellyfin** – media streaming server with volumes under `/srv/jellyfin`.
   - **GitLab** – self-hosted Git service with named volumes.
   - **Pi-hole** – DNS filtering service.
+  - **MeTube** – lightweight downloader using youtube-dl.
   - **JupyterLab** – built from `jupyter/Dockerfile`; includes the
     `jupyterlab-git` and `jupyterlab_scheduler` extensions so notebooks can be
     version controlled and scheduled directly from the web interface.
