@@ -10,6 +10,21 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 ###############################################################################
+# Determine the /home directory to use for host bind mounts
+###############################################################################
+mapfile -t HOME_ENTRIES < <(ls -1 /home)
+if [[ ${#HOME_ENTRIES[@]} -eq 1 ]]; then
+  HOME_USER="${HOME_ENTRIES[0]}"
+else
+  read -rp "Which user directory under /home should be used? " HOME_USER
+fi
+HOME_DIR="/home/${HOME_USER}"
+if [[ ! -d "$HOME_DIR" ]]; then
+  echo "Error: $HOME_DIR does not exist" >&2
+  exit 1
+fi
+
+###############################################################################
 # One‑time Docker install (APT, rootful) – optional prompt
 ###############################################################################
 read -rp "Run one‑time Docker installation? [y/N]: " ans
@@ -104,8 +119,8 @@ create_or_start openwebui \
  ghcr.io/open-webui/open-webui:latest
 
 ### Dashy -----------------------------------------------------------------
-DASHY_CONF="/home/[user]/docker/dashy/public/conf.yml"
-DASHY_ICONS="/home/[user]/docker/dashy/icons"
+DASHY_CONF="$HOME_DIR/docker/dashy/public/conf.yml"
+DASHY_ICONS="$HOME_DIR/docker/dashy/icons"
 mkdir -p "$(dirname "$DASHY_CONF")" "$DASHY_ICONS"
 
 create_or_start dashy \
@@ -158,6 +173,17 @@ create_or_start pihole \
   --cap-add=NET_ADMIN \
   pihole/pihole:latest
 
+### JupyterLab (with git plugin) -----------------------------------------
+# Build the image the first time the script runs
+if ! docker image inspect my-jupyter >/dev/null 2>&1; then
+  echo "🛠️  Building my-jupyter image"
+  docker build -t my-jupyter "$(dirname "$0")/jupyter"
+fi
+
+create_or_start jupyter \
+  -p 8888:8888 \
+  my-jupyter
+
 ###############################################################################
 # Friendly summary
 ###############################################################################
@@ -170,5 +196,6 @@ Access URLs
 • Dashy        : http://<host>:8088
 • Jellyfin     : http://<host>:8096  (host network)
 • Metube       : http://<host>:8081
+• JupyterLab   : http://<host>:8888
 
 EOF
