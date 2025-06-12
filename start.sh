@@ -173,11 +173,14 @@ create_or_start pihole \
   --cap-add=NET_ADMIN \
   pihole/pihole:latest
 
-### JupyterLab (with git plugin) -----------------------------------------
-# Build the image the first time the script runs
-if ! docker image inspect my-jupyter >/dev/null 2>&1; then
-  echo "🛠️  Building my-jupyter image"
-  docker build -t my-jupyter "$(dirname "$0")/jupyter"
+### JupyterLab (git & scheduler plugins, pinned <4) --------------------
+# Always rebuild the image so pinned package versions take effect
+echo "🛠️  Building my-jupyter image"
+docker build -t my-jupyter "$(dirname "$0")/jupyter"
+
+# Recreate the container if it already exists so the new image is used
+if docker ps -a --filter "name=^jupyter$" --format '{{.Names}}' | grep -q '^jupyter$'; then
+  docker rm -f jupyter
 fi
 
 create_or_start jupyter \
