@@ -31,8 +31,8 @@ At completion a list of URLs for each service will be displayed.
   - **GitLab** – self-hosted Git service with named volumes.
   - **Pi-hole** – DNS filtering service.
   - **JupyterLab** – built from `jupyter/Dockerfile`; includes the
-    `jupyterlab-git` extension so notebooks can be version controlled directly
-    from the web interface.
+    `jupyterlab-git` and `jupyterlab_scheduler` extensions so notebooks can be
+    version controlled and scheduled directly from the web interface.
 
 The Jupyter image is built automatically the first time `start.sh` runs. After
 setup, visit the printed URLs (e.g. `https://<host>:9443` for Portainer) to use

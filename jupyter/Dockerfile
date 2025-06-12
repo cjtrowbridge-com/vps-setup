@@ -7,8 +7,9 @@ WORKDIR /app
 # Install JupyterLab with the git extension and git itself
 RUN apt-get update \
     && apt-get install -y git \
-    && pip install --no-cache-dir jupyterlab jupyterlab-git \
-    && jupyter server extension enable --py jupyterlab_git
+    && pip install --no-cache-dir jupyterlab jupyterlab-git jupyterlab_scheduler \
+    && jupyter server extension enable --py jupyterlab_git \
+    && jupyter server extension enable --py jupyterlab_scheduler
 
 # Make port 8888 available to the world outside this container
 EXPOSE 8888
