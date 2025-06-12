@@ -173,7 +173,7 @@ create_or_start pihole \
   --cap-add=NET_ADMIN \
   pihole/pihole:latest
 
-### JupyterLab (with git plugin) -----------------------------------------
+### JupyterLab (with git & scheduler plugins) ---------------------------
 # Build the image the first time the script runs
 if ! docker image inspect my-jupyter >/dev/null 2>&1; then
   echo "🛠️  Building my-jupyter image"
