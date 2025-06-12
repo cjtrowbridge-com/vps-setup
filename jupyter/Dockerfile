@@ -7,7 +7,11 @@ WORKDIR /app
 # Install JupyterLab with the git extension and git itself
 RUN apt-get update \
     && apt-get install -y git \
-    && pip install --no-cache-dir jupyterlab jupyterlab-git jupyterlab_scheduler \
+    && pip install --no-cache-dir \
+        'jupyterlab<4' \
+        'jupyter-server<2' \
+        jupyterlab-git \
+        jupyterlab_scheduler \
     && jupyter server extension enable --py jupyterlab_git \
     && jupyter server extension enable --py jupyterlab_scheduler
 
